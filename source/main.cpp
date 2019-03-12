@@ -15,7 +15,7 @@ GLFWwindow* InitializeWindow();
 
 int main()
 {
-    float sizeOfRow =2;
+    float sizeOfRow =10;
     float vertices[] = 
     {
         0.5f,  0.5f,  0.0f,
