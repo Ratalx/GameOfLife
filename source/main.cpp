@@ -15,10 +15,12 @@ GLFWwindow* InitializeWindow();
 
 int main()
 {
-    float sizeOfRow =2;
+    float sizeOfRow =10;
 
     std::vector<int> seed;
-    seed.emplace_back(1);
+    seed.emplace_back(55);
+    seed.emplace_back(54);
+    seed.emplace_back(53);
 
 
     auto Life = new GameOfLifeLogic(sizeOfRow,seed);
@@ -76,27 +78,41 @@ k++;
     
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,  indices.size()*sizeof( unsigned int), &indices[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,  indices2.size()*sizeof( unsigned int), &indices2[0], GL_DYNAMIC_DRAW);
 
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+double lastTime =0.0;
     while(!glfwWindowShouldClose(window))
-    {
+    { 
         processInput(window);
 
         glClearColor(0.0f,0.0f,0.0f,1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER,  indices.size()*sizeof( unsigned int), &indices[0], GL_DYNAMIC_DRAW);
 
         ourShader.use();
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, sizeOfRow*sizeOfRow*6, GL_UNSIGNED_INT, 0);
-        //glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES,indices.size(),GL_UNSIGNED_INT,0);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER,  indices2.size()*sizeof( unsigned int), &indices2[0], GL_DYNAMIC_DRAW);
+
+        glDrawElements(GL_TRIANGLES, indices2.size(), GL_UNSIGNED_INT, 0);
         glfwSwapBuffers(window);
         glfwPollEvents();
+        std::cout<<glfwGetTime()<<"\n";
+        if(glfwGetTime()-lastTime >= 2.0)
+        {   
+            lastTime=glfwGetTime();  
+            Life->UpadateCells();
+            indices2=getIndices(indices,Life->cells);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER,  indices2.size()*sizeof( unsigned int), &indices2[0], GL_DYNAMIC_DRAW);
+        }
     }
 
     glDeleteVertexArrays(1, &VAO);
