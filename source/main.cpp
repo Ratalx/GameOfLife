@@ -1,72 +1,64 @@
 //#include<glad/glad.h>
 #include<shader.h>
-
 #include<GLFW/glfw3.h>
 #include<iostream>
 #include<string>
-#include<vector>
-
+#include<GameOfLifeLogic.h>
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
+std::vector<unsigned int> getIndices(std::vector<unsigned int> globalIndices,
+                            std::vector<std::vector<Cell>> cells);
 GLFWwindow* InitializeWindow();
 
 
 int main()
 {
-    float sizeOfRow =10;
-    float vertices[] = 
-    {
-        0.5f,  0.5f,  0.0f,
-        0.5f,   -0.5f,  0.0f,
+    float sizeOfRow =2;
 
-        -0.5f,  -0.5f,  0.0f,
-        -0.5f,  0.5f,   0.0f
-    };
-    std::vector<float> vertices2;
+    std::vector<int> seed;
+    seed.emplace_back(1);
+
+
+    auto Life = new GameOfLifeLogic(sizeOfRow,seed);
+
+    std::vector<float> vertices;
     for(float i =0;i<=sizeOfRow;++i)
     {
         for(float j =0;j<=sizeOfRow;++j)
         {
-            vertices2.emplace_back( -1.f+j*(2.0f/sizeOfRow) );
-            vertices2.emplace_back( 1.f -i*(2.0f/sizeOfRow));
-            vertices2.emplace_back(0);
+            vertices.emplace_back( -1.f+j*(2.0f/sizeOfRow) );
+            vertices.emplace_back( 1.f -i*(2.0f/sizeOfRow));
+            vertices.emplace_back(0);
         }
     }
-    std::vector<unsigned int> indices2;
-    //indices2.resize(sizeOfRow*sizeOfRow*3);
+    std::vector<unsigned int> indices;
     for(int j =0;j<sizeOfRow*sizeOfRow;j+=sizeOfRow+1)
         for(int i=0;i<sizeOfRow;i++)
         {
 
-                indices2.emplace_back(j+i);
-                indices2.emplace_back(j+i+1);
-                indices2.emplace_back(j+i+sizeOfRow+2);
-                indices2.emplace_back(j+i);
-                indices2.emplace_back(j+i+sizeOfRow+1);
-                indices2.emplace_back(j+i+sizeOfRow+2);
-            
+                indices.emplace_back(j+i);
+                indices.emplace_back(j+i+1);
+                indices.emplace_back(j+i+sizeOfRow+2);
+                indices.emplace_back(j+i);
+                indices.emplace_back(j+i+sizeOfRow+1);
+                indices.emplace_back(j+i+sizeOfRow+2);
         }
-    
+        auto indices2 = getIndices(indices,Life->cells);
     int k =0;
     for(auto i : indices2)
     {
+
 k++;
-        std::cout << i <<" ";
+        std::cout << static_cast<int>(i) <<" ";
         if(k==3)
         {
             k=0;
         std::cout<<"\n";
         }
+        
     }
-
-
-    unsigned int indices[] =
-    {
-        0,1,3, //first triangle
-       1,2,3 //second triangle
-    };
 
     auto* window = InitializeWindow();
     
@@ -80,11 +72,11 @@ k++;
 
     glGenBuffers(1,&VBO);
     glBindBuffer(GL_ARRAY_BUFFER,VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices2.size()*sizeof(float),&vertices2[0],GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(float),&vertices[0],GL_STATIC_DRAW);
     
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,  indices2.size()*sizeof( unsigned int), &indices2[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,  indices.size()*sizeof( unsigned int), &indices[0], GL_DYNAMIC_DRAW);
 
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -95,8 +87,6 @@ k++;
     while(!glfwWindowShouldClose(window))
     {
         processInput(window);
-
-
 
         glClearColor(0.0f,0.0f,0.0f,1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -157,5 +147,17 @@ GLFWwindow* InitializeWindow()
 
     return window;
 }
-void InitializeOpenGL();
-void InitializeBuffers();
+
+std::vector<unsigned int> getIndices(std::vector<unsigned int> globalIndices,std::vector<std::vector<Cell>> cells)
+{
+    std::vector<unsigned int> indices;
+    for(int i =0;i<cells.size();++i)
+    {
+        for(int j=0;j<cells[i].size();++j)
+        {
+            if(cells[i][j]==Cell::life)
+            indices.insert(indices.begin(),&globalIndices[i*cells.size()*6 + j*6],&globalIndices[i*cells.size()*6 +j*6+6]);
+        }
+    }
+    return indices;
+}
