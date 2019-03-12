@@ -36,16 +36,16 @@ int main()
     }
     std::vector<unsigned int> indices2;
     //indices2.resize(sizeOfRow*sizeOfRow*3);
-    
-        for(int i=0;i<sizeOfRow*sizeOfRow;i=+sizeOfRow)
+    for(int j =0;j<sizeOfRow*sizeOfRow;j+=sizeOfRow+1)
+        for(int i=0;i<sizeOfRow;i++)
         {
 
-                indices2.emplace_back(i);
-                indices2.emplace_back(i+1);
-                indices2.emplace_back(i+sizeOfRow+2);
-                indices2.emplace_back(i);
-                indices2.emplace_back(i+sizeOfRow+1);
-                indices2.emplace_back(i+sizeOfRow+2);
+                indices2.emplace_back(j+i);
+                indices2.emplace_back(j+i+1);
+                indices2.emplace_back(j+i+sizeOfRow+2);
+                indices2.emplace_back(j+i);
+                indices2.emplace_back(j+i+sizeOfRow+1);
+                indices2.emplace_back(j+i+sizeOfRow+2);
             
         }
     
@@ -103,7 +103,7 @@ k++;
 
         ourShader.use();
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, sizeOfRow*sizeOfRow*6, GL_UNSIGNED_INT, 0);
         //glDrawArrays(GL_TRIANGLES, 0, 3);
         glfwSwapBuffers(window);
         glfwPollEvents();
