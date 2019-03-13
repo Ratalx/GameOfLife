@@ -135,9 +135,7 @@ uniqueWindowPtr InitializeWindow()
     glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);   
 
 
-    std::unique_ptr<GLFWwindow,void(*)(GLFWwindow*)> window (glfwCreateWindow(800,600,
-                                                    "Game Of Life",nullptr,nullptr)
-                                                    ,glfwDestroyWindow);
+    uniqueWindowPtr window (glfwCreateWindow(800,600,"Game Of Life",nullptr,nullptr),glfwDestroyWindow);
     if (window == nullptr)
     {
         std::cerr<<"Failed to Create GLFW Window"<<std::endl;
