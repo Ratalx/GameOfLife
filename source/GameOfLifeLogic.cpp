@@ -12,7 +12,7 @@ GameOfLifeLogic::GameOfLifeLogic(int sizeOfRow)
     }
 }
 
-GameOfLifeLogic::GameOfLifeLogic(int sizeOfRow,const  std::vector<int> & cellsIndexes)
+GameOfLifeLogic::GameOfLifeLogic(int sizeOfRow,const  std::vector< int> & cellsIndexes)
 {
     cells.resize(sizeOfRow);
 
