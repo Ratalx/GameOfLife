@@ -6,6 +6,7 @@
 #include<string>
 #include<memory>
 #include<functional>
+#include<array>
 
 using uniqueWindowPtr =std::unique_ptr<GLFWwindow,std::function<void(GLFWwindow*)>>;
 
@@ -14,11 +15,12 @@ uniqueWindowPtr processInput(uniqueWindowPtr window);
 std::vector<unsigned int> getIndices(std::vector<unsigned int> globalIndices,
                             std::vector<std::vector<Cell>> cells);
 uniqueWindowPtr InitializeWindow();
+std::vector<unsigned int> makeGridIndices(const int sizeOfGridIndices,int sizeOfRow);
 
 
 int main()
 {
-    float sizeOfRow = 10;
+   constexpr int sizeOfRow = 10;
 
     const std::vector< int> seed{55,54,53};
 
@@ -34,25 +36,38 @@ int main()
             vertices.push_back(0);
         }
     }
+    constexpr auto sizeOfGridIndices =sizeOfRow*sizeOfRow*sizeOfRow; 
+    
+    auto gridIndices = makeGridIndices(sizeOfGridIndices,sizeOfRow);
 
-    std::vector<unsigned int> gridIndices;
-    for(int j =0;j<sizeOfRow*sizeOfRow;j+=sizeOfRow+1)
-        for(int i=0;i<sizeOfRow;i++)
-        {
-
-                gridIndices.push_back(j+i);
-                gridIndices.push_back(j+i+1);
-                gridIndices.push_back(j+i+sizeOfRow+2);
-                gridIndices.push_back(j+i);
-                gridIndices.push_back(j+i+sizeOfRow+1);
-                gridIndices.push_back(j+i+sizeOfRow+2);
-        }
-        
     auto lifeCellsIndices = getIndices(gridIndices,Life->cells);
 
     auto window = InitializeWindow();
-    Shader ourShader("vertexShader.vs",
-                     "fragmentShader.fs");
+    Shader* BoxShader;
+    Shader* GridShader;
+    
+    try
+    {
+        BoxShader = new Shader("vertexShader.vs",
+                               "BoxFragmentShader.fs");
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        return -1;
+    }
+    try
+    {
+        GridShader = new Shader("vertexShader.vs",
+                                "GridFragmentShader.fs");    
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        return -1;
+    }
+    
+
 
     unsigned int VBO,VAO,EBO;
 
@@ -62,11 +77,13 @@ int main()
     glGenBuffers(1,&VBO);
     glBindBuffer(GL_ARRAY_BUFFER,VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(float),&vertices[0],GL_STATIC_DRAW);
+
+    
     
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, lifeCellsIndices.size()*sizeof( unsigned int),
-                                                 &lifeCellsIndices[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, gridIndices.size()*sizeof( unsigned int),
+                                                 &gridIndices[0], GL_DYNAMIC_DRAW);
 
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<void*>(0));
@@ -81,28 +98,28 @@ int main()
 
         glClearColor(0.0f,0.0f,0.0f,1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+        GridShader->use();
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, gridIndices.size()*sizeof(unsigned int),
                                                     &gridIndices[0], GL_STATIC_DRAW);
 
-        ourShader.use();
-        glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES,gridIndices.size(),GL_UNSIGNED_INT,0);
+
+
+        BoxShader->use();
+
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, lifeCellsIndices.size()*sizeof(unsigned int),
                                                     &lifeCellsIndices[0], GL_DYNAMIC_DRAW);
-
         glDrawElements(GL_TRIANGLES, lifeCellsIndices.size(), GL_UNSIGNED_INT, 0);
         glfwSwapBuffers(window.get());
         glfwPollEvents();
-        std::cout<<glfwGetTime()<<"\n";
         if(glfwGetTime()-lastTime >= 1.0)
         {   
             lastTime=glfwGetTime();  
             Life->UpadateCells();
             lifeCellsIndices=getIndices(gridIndices,Life->cells);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, lifeCellsIndices.size()*sizeof(unsigned int),
-                                                        &lifeCellsIndices[0], GL_DYNAMIC_DRAW);
         }
     }
 
@@ -170,4 +187,26 @@ std::vector<unsigned int> getIndices(std::vector<unsigned int> globalIndices,
         }
     }
     return indices;
+}
+
+std::vector<unsigned int> makeGridIndices( int sizeOfGridIndices, int sizeOfRow) 
+{
+    std::vector<unsigned int> gridIndices;
+    gridIndices.resize(sizeOfGridIndices);
+    int k=0;
+    for(int j =0;j<sizeOfRow*sizeOfRow;j+=sizeOfRow+1)
+        for(int i=0;i<sizeOfRow;i++)
+        {
+            
+                gridIndices[k]=(j+i);
+                gridIndices[k+1]=(j+i+1);
+                gridIndices[k+2]=(j+i+sizeOfRow+2);
+                gridIndices[k+3]=(j+i);
+                gridIndices[k+4]=(j+i+sizeOfRow+1);
+                gridIndices[k+5]=(j+i+sizeOfRow+2);
+                k+=6;
+        }
+        
+return gridIndices;
+
 }
