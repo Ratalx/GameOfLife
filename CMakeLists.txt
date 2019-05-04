@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.1)
 project(GameOfLife)
 
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source")
-set(SOURCES "${SRC_DIR}/main.cpp" "${SRC_DIR}/shader.cpp" "${SRC_DIR}/GameOfLifeLogic.cpp")
+set(SOURCES "${SRC_DIR}/main.cpp" "${SRC_DIR}/shader.cpp" "${SRC_DIR}/GameOfLifeLogic.cpp" "${SRC_DIR}/RleReader.cpp")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libs")
 
 add_executable(${PROJECT_NAME} ${SOURCES})

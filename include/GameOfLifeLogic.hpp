@@ -1,5 +1,5 @@
+#pragma once
 #include<vector>
-#include<iostream>
 enum class Cell : int {dead=0,life=1};
 
 
@@ -11,6 +11,7 @@ class GameOfLifeLogic
     unsigned nextI,nextJ,prevI,prevJ;
     GameOfLifeLogic()=delete;
     GameOfLifeLogic(int sizeOfRow); 
+    GameOfLifeLogic(std::vector<std::vector<Cell>> cells): cells(cells){};
     GameOfLifeLogic(int sizeOfRow,const std::vector< int> &cellsIndexes);
     void UpadateCells();
 

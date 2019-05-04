@@ -1,4 +1,5 @@
-#include"../include/GameOfLifeLogic.h"
+#include"../include/GameOfLifeLogic.hpp"
+#include<iostream>
 
 GameOfLifeLogic::GameOfLifeLogic(int sizeOfRow)
 {

@@ -1,7 +1,7 @@
-//#include<glad/glad.h>
-#include<shader.h>
+#include<shader.hpp>
 #include<GLFW/glfw3.h>
-#include<GameOfLifeLogic.h>
+#include<GameOfLifeLogic.hpp>
+#include<RleReader.hpp>
 #include<iostream>
 #include<string>
 #include<memory>
@@ -20,11 +20,16 @@ std::vector<unsigned int> makeGridIndices(const int sizeOfGridIndices,int sizeOf
 
 int main()
 {
-   constexpr int sizeOfRow = 10;
-   float tickTime = 1.0;
-    const std::vector< int> seed{9,0,1};
+    int sizeOfRow = 10;
+    float tickTime = 00.0;
 
-    std::unique_ptr<GameOfLifeLogic> Life(new GameOfLifeLogic(sizeOfRow,seed));
+
+    RleReader rleReader("RlePatterns/bi-gun.rle");
+
+    std::unique_ptr<GameOfLifeLogic> Life(new GameOfLifeLogic(rleReader.GenerateStartVector()));
+    sizeOfRow = Life->cells.size();
+
+
 
     std::vector<float> vertices;
     for(float i =0;i<=sizeOfRow;++i)
@@ -36,7 +41,7 @@ int main()
             vertices.push_back(0);
         }
     }
-    constexpr auto sizeOfGridIndices =sizeOfRow*sizeOfRow*sizeOfRow; 
+     auto sizeOfGridIndices =sizeOfRow*sizeOfRow*sizeOfRow; 
     
     auto gridIndices = makeGridIndices(sizeOfGridIndices,sizeOfRow);
 
