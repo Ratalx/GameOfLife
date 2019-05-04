@@ -21,8 +21,8 @@ std::vector<unsigned int> makeGridIndices(const int sizeOfGridIndices,int sizeOf
 int main()
 {
    constexpr int sizeOfRow = 10;
-
-    const std::vector< int> seed{55,54,53};
+   float tickTime = 1.0;
+    const std::vector< int> seed{9,0,1};
 
     std::unique_ptr<GameOfLifeLogic> Life(new GameOfLifeLogic(sizeOfRow,seed));
 
@@ -115,7 +115,7 @@ int main()
         glDrawElements(GL_TRIANGLES, lifeCellsIndices.size(), GL_UNSIGNED_INT, 0);
         glfwSwapBuffers(window.get());
         glfwPollEvents();
-        if(glfwGetTime()-lastTime >= 1.0)
+        if(glfwGetTime()-lastTime >= tickTime)
         {   
             lastTime=glfwGetTime();  
             Life->UpadateCells();
