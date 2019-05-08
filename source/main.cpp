@@ -1,5 +1,8 @@
 #include<shader.hpp>
 #include<GLFW/glfw3.h>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 #include<GameOfLifeLogic.hpp>
 #include<RleReader.hpp>
 #include<iostream>
@@ -7,6 +10,7 @@
 #include<memory>
 #include<functional>
 #include<array>
+
 
 using uniqueWindowPtr =std::unique_ptr<GLFWwindow,std::function<void(GLFWwindow*)>>;
 
@@ -16,12 +20,15 @@ std::vector<unsigned int> getIndices(std::vector<unsigned int> globalIndices,
                             std::vector<std::vector<Cell>> cells);
 uniqueWindowPtr InitializeWindow();
 std::vector<unsigned int> makeGridIndices(const int sizeOfGridIndices,int sizeOfRow);
-
+double clockToMilliseconds(clock_t ticks);
+ImGuiIO SetupImGuiContext();
 
 int main()
 {
     int sizeOfRow = 10;
-    float tickTime = 00.0;
+    float tickTime = 0.0;
+    float frameCap = 60.0;
+    const char* glsl_version = "#version 130";
 
 
     RleReader rleReader("RlePatterns/bi-gun.rle");
@@ -48,13 +55,21 @@ int main()
     auto lifeCellsIndices = getIndices(gridIndices,Life->cells);
 
     auto window = InitializeWindow();
-    Shader* BoxShader;
-    Shader* GridShader;
+
+    auto io = SetupImGuiContext();
+    ImGui_ImplGlfw_InitForOpenGL(window.get(), true);
+    ImGui_ImplOpenGL3_Init(glsl_version);
+
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+
+   std::unique_ptr<Shader> BoxShader;
+    std::unique_ptr<Shader> GridShader;
     
     try
     {
-        BoxShader = new Shader("vertexShader.vs",
-                               "BoxFragmentShader.fs");
+        BoxShader = std::make_unique<Shader>(Shader("vertexShader.vs",
+                               "BoxFragmentShader.fs"));
     }
     catch(const std::exception& e)
     {
@@ -63,8 +78,8 @@ int main()
     }
     try
     {
-        GridShader = new Shader("vertexShader.vs",
-                                "GridFragmentShader.fs");    
+        GridShader = std::make_unique<Shader>(Shader("vertexShader.vs",
+                                "GridFragmentShader.fs"));    
     }
     catch(const std::exception& e)
     {
@@ -97,12 +112,49 @@ int main()
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     double lastTime =0.0;
+
+    clock_t deltaTime = 0;
+    unsigned int frames = 0;
+    double  frameRate = 30;
+    double  averageFrameTimeMilliseconds = 33.333;
+
     while(!glfwWindowShouldClose(window.get()))
     { 
-       window = processInput(std::move(window));
+        clock_t beginFrame = clock();
+        window = processInput(std::move(window));
+
+
+       ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        {
+            static float f = 0.0f;
+            static int counter = 0;
+
+            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+            // ImGui::Checkbox("Start/Stop", &isStart);      // Edit bools storing our window open/close state
+            // ImGui::Checkbox("Another Window", &show_another_window);
+
+            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+                counter++;
+            ImGui::SameLine();
+            ImGui::Text("counter = %d", counter);
+
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::End();
+        }
+        ImGui::Render();
 
         glClearColor(0.0f,0.0f,0.0f,1.0f);
+        
         glClear(GL_COLOR_BUFFER_BIT);
+        
         GridShader->use();
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -118,18 +170,48 @@ int main()
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, lifeCellsIndices.size()*sizeof(unsigned int),
                                                     &lifeCellsIndices[0], GL_DYNAMIC_DRAW);
         glDrawElements(GL_TRIANGLES, lifeCellsIndices.size(), GL_UNSIGNED_INT, 0);
+                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
         glfwSwapBuffers(window.get());
         glfwPollEvents();
+
+     
+
+
         if(glfwGetTime()-lastTime >= tickTime)
         {   
             lastTime=glfwGetTime();  
             Life->UpadateCells();
             lifeCellsIndices=getIndices(gridIndices,Life->cells);
+
+            frames ++;
+        }
+
+
+
+            clock_t endFrame = clock();        
+            deltaTime += endFrame - beginFrame;
+
+        if( clockToMilliseconds(deltaTime)>1000.0)
+        { 
+            frameRate = (double)frames*0.5 +  frameRate*0.5; //more stable
+            std::cout<<"Frames:"<<frames<<std::endl;
+
+            frames = 0;
+            deltaTime -= CLOCKS_PER_SEC;
+            averageFrameTimeMilliseconds  = 1000.0/(frameRate==0?0.001:frameRate);
+
+            std::cout<<"CPU time was:"<<averageFrameTimeMilliseconds<<std::endl;
+            std::cout<<"fps:"<<frameRate<<std::endl;
         }
     }
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwTerminate();
     return 0;
@@ -214,4 +296,18 @@ std::vector<unsigned int> makeGridIndices( int sizeOfGridIndices, int sizeOfRow)
         
 return gridIndices;
 
+}
+
+ImGuiIO SetupImGuiContext()
+{
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+return  std::move(io);
+}
+
+double clockToMilliseconds(clock_t ticks){
+    // units/(units/time) => time (seconds) * 1000 = milliseconds
+    return (ticks/(double)CLOCKS_PER_SEC)*1000.0;
 }
