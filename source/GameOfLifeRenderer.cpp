@@ -149,7 +149,7 @@
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         {
-            ImGui::Begin("GameOfLife");                          // Create a window called "Hello, world!" and append into it.
+            ImGui::Begin("GameOfLife");                          
             auto rleFileIndexTemp=configData->rleFileIndex;
             ImGui::RadioButton("Blinker", &configData->rleFileIndex,0);   
             ImGui::SameLine();
@@ -190,18 +190,11 @@
             double xpos, ypos;
             glfwGetWindowSize(window,&width,&height);
             glfwGetCursorPos(window, &xpos, &ypos);
-            try{
-            //std::shared_ptr<ConfigData> configData(static_cast<ConfigData*>(glfwGetWindowUserPointer(window)));
             ConfigData* configData = (ConfigData*)glfwGetWindowUserPointer(window);
             int x = static_cast<int>(xpos/width*configData->sizeOfRow);
             int y = static_cast<int>(ypos/height*configData->sizeOfRow);
             configData->cellsToAdd.push_back({x,y});
-            }
-            catch(...)
-            {
-                std::cerr<<"std::shared_ptr<ConfigData> configData(static_cast<ConfigData*>(glfwGetWindowUserPointer(window)));\n";
-                throw std::runtime_error("cps00");
-            }
+
         }
     }
 }
