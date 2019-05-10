@@ -1,7 +1,7 @@
 #include"../include/shader.hpp"
 #include <fstream>
 #include<cerrno>
-
+namespace GameOfLife{
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
     std::string vertexCode, fragmentCode;
@@ -99,3 +99,4 @@ void Shader::setFloat(const std::string &name, float value) const
     glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 }
 
+}

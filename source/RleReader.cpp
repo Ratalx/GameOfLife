@@ -3,6 +3,8 @@
 #include<fstream>
 #include<iostream>
 #include<sstream>
+namespace GameOfLife
+{
 using matrixOfCells = std::vector<std::vector<Cell>>;
 matrixOfCells RleReader::GenerateStartVector()
 {
@@ -117,4 +119,4 @@ bool RleReader::isEnd(char c) const noexcept
 {
     return (c == '!');
 }
-
+}

@@ -2,6 +2,8 @@
 #include<string>
 #include<istream>
 #include"GameOfLifeLogic.hpp"
+namespace GameOfLife
+{
 class RleReader {
     using matrixOfCells = std::vector<std::vector<Cell>>;
     public:
@@ -18,3 +20,4 @@ class RleReader {
    inline bool isNewLine(char) const noexcept;
    inline bool isEnd(char) const noexcept;
 };
+}
