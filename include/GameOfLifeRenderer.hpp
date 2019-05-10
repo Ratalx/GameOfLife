@@ -59,12 +59,20 @@ class GameOfLifeRenderer
 
 };
 
+struct Point
+{
+    int x,y;
+};
+
 struct ConfigData
 {
     float tickTime = 0.0;
     int rleFileIndex = 0;
     bool isRunning = true;
-    bool isChanged = false; 
+    bool isChanged = false;
+    int sizeOfRow = 20;
+    std::vector<Point> cellsToAdd;
 };
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 }

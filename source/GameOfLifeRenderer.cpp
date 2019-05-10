@@ -6,6 +6,7 @@
     {
         this->configData = configData;
         window = InitializeWindow();
+        glfwSetWindowUserPointer(window.get(), configData.get());
         io = SetupImGuiContext();
         ImGui_ImplGlfw_InitForOpenGL(window.get(), true);
         ImGui_ImplOpenGL3_Init(glsl_version);
@@ -41,6 +42,7 @@
 
         glfwMakeContextCurrent(window.get());
         glfwSetFramebufferSizeCallback(window.get(),framebuffer_size_callback);
+        glfwSetMouseButtonCallback(window.get(), mouse_button_callback);
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
@@ -52,10 +54,7 @@
         return window;
     }
 
-    void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-    {
-       glViewport(0,0,width,height);
-    }
+ 
 
     uniqueWindowPtr GameOfLifeRenderer::processInput(uniqueWindowPtr window)
     {
@@ -152,12 +151,12 @@
         {
             ImGui::Begin("GameOfLife");                          // Create a window called "Hello, world!" and append into it.
             auto rleFileIndexTemp=configData->rleFileIndex;
-            ImGui::RadioButton("bi-gun", &configData->rleFileIndex,0);   
+            ImGui::RadioButton("Blinker", &configData->rleFileIndex,0);   
             ImGui::SameLine();
             ImGui::RadioButton("GliterGun", &configData->rleFileIndex,1);
             ImGui::RadioButton("Blinker++",&configData->rleFileIndex,2);
             ImGui::SameLine();
-            ImGui::RadioButton("Blinker",&configData->rleFileIndex,3);
+            ImGui::RadioButton("bi-gun",&configData->rleFileIndex,3);
             if(rleFileIndexTemp!=configData->rleFileIndex)
             {
                 configData->isChanged = true;
@@ -176,5 +175,33 @@
         ImGui::Render();
 
          ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    }
+
+    void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+    {
+       glViewport(0,0,width,height);
+    }
+
+    void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+    {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+        {
+            int width,height;
+            double xpos, ypos;
+            glfwGetWindowSize(window,&width,&height);
+            glfwGetCursorPos(window, &xpos, &ypos);
+            try{
+            //std::shared_ptr<ConfigData> configData(static_cast<ConfigData*>(glfwGetWindowUserPointer(window)));
+            ConfigData* configData = (ConfigData*)glfwGetWindowUserPointer(window);
+            int x = static_cast<int>(xpos/width*configData->sizeOfRow);
+            int y = static_cast<int>(ypos/height*configData->sizeOfRow);
+            configData->cellsToAdd.push_back({x,y});
+            }
+            catch(...)
+            {
+                std::cerr<<"std::shared_ptr<ConfigData> configData(static_cast<ConfigData*>(glfwGetWindowUserPointer(window)));\n";
+                throw std::runtime_error("cps00");
+            }
+        }
     }
 }

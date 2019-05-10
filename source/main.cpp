@@ -32,7 +32,7 @@ int main()
     std::unique_ptr<RleReader> rleReader;
     try
     {
-        rleReader=std::make_unique<RleReader>("RlePatterns/bi-gun.rle");
+        rleReader=std::make_unique<RleReader>("RlePatterns/blinker.rle");
     }
     catch(const std::exception& e)
     {
@@ -41,10 +41,10 @@ int main()
     }
     std::unique_ptr<GameOfLifeRenderer> Renderer(new GameOfLifeRenderer(configData));
     std::unique_ptr<GameOfLifeLogic> Life(new GameOfLifeLogic(rleReader->GenerateStartVector()));
-    sizeOfRow = Life->cells.size();
+   configData->sizeOfRow = Life->cells.size();
 
-    auto vertices= MakeVertices(sizeOfRow);
-    auto gridIndices = MakeGridIndices(sizeOfRow);
+    auto vertices= MakeVertices(configData->sizeOfRow);
+    auto gridIndices = MakeGridIndices(configData->sizeOfRow);
     auto lifeCellsIndices = getIndices(gridIndices,Life->cells);
 
     Renderer->MakeShaders();
@@ -71,15 +71,16 @@ int main()
             {
                 rleReader = std::move(RleUpdate(configData->rleFileIndex));
                 Life = std::make_unique<GameOfLifeLogic>(rleReader->GenerateStartVector());
-                sizeOfRow = Life->cells.size();
-                vertices= MakeVertices(sizeOfRow);
-                gridIndices = MakeGridIndices(sizeOfRow);
+                configData->sizeOfRow = Life->cells.size();
+                vertices= MakeVertices(configData->sizeOfRow);
+                gridIndices = MakeGridIndices(configData->sizeOfRow);
                 lifeCellsIndices = getIndices(gridIndices,Life->cells);
                 Renderer->PrepareBuffers(vertices,gridIndices);
                 configData->isChanged=false;
             }
             lastTime=glfwGetTime();  
-            Life->UpadateCells();
+            Life->UpadateCells(configData->cellsToAdd);
+            configData->cellsToAdd.erase(configData->cellsToAdd.begin(),configData->cellsToAdd.end());
             lifeCellsIndices=getIndices(gridIndices,Life->cells);
         }
     }
@@ -183,7 +184,7 @@ std::unique_ptr<RleReader> RleUpdate(int rleFileIndex)
     std::string path;
     switch (rleFileIndex)
     {
-    case 0:
+    case 3:
         path = "RlePatterns/bi-gun.rle";
         break;
     case 1:
@@ -192,7 +193,7 @@ std::unique_ptr<RleReader> RleUpdate(int rleFileIndex)
     case 2:
         path = "RlePatterns/blinkerfuse.rle";
         break;
-    case 3:
+    case 0:
         path = "RlePatterns/blinker.rle";
         break;
     default:
