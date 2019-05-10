@@ -13,7 +13,7 @@ matrixOfCells RleReader::GenerateStartVector()
     matrixOfCells grid;
     if(!file.is_open())
     {
-        std::cout<<"file not opened correctly\n";
+        std::cout<<"Rlefile not opened correctly\n";
         throw std::runtime_error("File Not Open");
     }
    

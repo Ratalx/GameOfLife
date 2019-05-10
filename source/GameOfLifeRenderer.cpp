@@ -151,16 +151,21 @@
         ImGui::NewFrame();
         {
             ImGui::Begin("GameOfLife");                          // Create a window called "Hello, world!" and append into it.
-
+            auto rleFileIndexTemp=configData->rleFileIndex;
             ImGui::RadioButton("bi-gun", &configData->rleFileIndex,0);   
             ImGui::SameLine();
             ImGui::RadioButton("GliterGun", &configData->rleFileIndex,1);
             ImGui::RadioButton("Blinker++",&configData->rleFileIndex,2);
             ImGui::SameLine();
             ImGui::RadioButton("Blinker",&configData->rleFileIndex,3);
-
+            if(rleFileIndexTemp!=configData->rleFileIndex)
+            {
+                configData->isChanged = true;
+            }
             if (ImGui::Button("Start/Stop"))
-            configData->isRunning=!configData->isRunning;  
+            {
+                configData->isRunning=!configData->isRunning;
+            }  
             ImGui::SameLine();
 
             ImGui::SliderFloat("tickTime", &configData->tickTime, 0.0f, 1.0f);

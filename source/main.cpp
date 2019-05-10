@@ -19,34 +19,32 @@ uniqueWindowPtr processInput(uniqueWindowPtr window);
 std::vector<unsigned int> getIndices(std::vector<unsigned int> globalIndices,
                             std::vector<std::vector<Cell>> cells);
 uniqueWindowPtr InitializeWindow();
-std::vector<unsigned int> makeGridIndices(const int sizeOfGridIndices,int sizeOfRow);
+std::vector<unsigned int> MakeGridIndices(int sizeOfRow);
 double clockToMilliseconds(clock_t ticks);
 ImGuiIO SetupImGuiContext();
+std::vector<float> MakeVertices(int sizeOfRow);
+std::unique_ptr<RleReader> RleUpdate(int rleFileIndex);
 
 int main()
 {
     int sizeOfRow = 10;
-    int rleFileIndex=0;
     std::shared_ptr<ConfigData> configData(new ConfigData());
-
-    RleReader rleReader("RlePatterns/bi-gun.rle");
+    std::unique_ptr<RleReader> rleReader;
+    try
+    {
+        rleReader=std::make_unique<RleReader>("RlePatterns/bi-gun.rle");
+    }
+    catch(const std::exception& e)
+    {
+         std::cerr << e.what() << '\n';
+         return -1;
+    }
     std::unique_ptr<GameOfLifeRenderer> Renderer(new GameOfLifeRenderer(configData));
-    std::unique_ptr<GameOfLifeLogic> Life(new GameOfLifeLogic(rleReader.GenerateStartVector()));
+    std::unique_ptr<GameOfLifeLogic> Life(new GameOfLifeLogic(rleReader->GenerateStartVector()));
     sizeOfRow = Life->cells.size();
 
-    std::vector<float> vertices;
-    for(float i =0;i<=sizeOfRow;++i)
-    {
-        for(float j =0;j<=sizeOfRow;++j)
-        {
-            vertices.push_back( -1.f+j*(2.0f/sizeOfRow) );
-            vertices.push_back( 1.f -i*(2.0f/sizeOfRow));
-            vertices.push_back(0);
-        }
-    }
-
-    auto sizeOfGridIndices =sizeOfRow*sizeOfRow*sizeOfRow; 
-    auto gridIndices = makeGridIndices(sizeOfGridIndices,sizeOfRow);
+    auto vertices= MakeVertices(sizeOfRow);
+    auto gridIndices = MakeGridIndices(sizeOfRow);
     auto lifeCellsIndices = getIndices(gridIndices,Life->cells);
 
     Renderer->MakeShaders();
@@ -69,6 +67,17 @@ int main()
 
         if(glfwGetTime()-lastTime >= configData->tickTime&&configData->isRunning)
         {   
+            if(configData->isChanged)
+            {
+                rleReader = std::move(RleUpdate(configData->rleFileIndex));
+                Life = std::make_unique<GameOfLifeLogic>(rleReader->GenerateStartVector());
+                sizeOfRow = Life->cells.size();
+                vertices= MakeVertices(sizeOfRow);
+                gridIndices = MakeGridIndices(sizeOfRow);
+                lifeCellsIndices = getIndices(gridIndices,Life->cells);
+                Renderer->PrepareBuffers(vertices,gridIndices);
+                configData->isChanged=false;
+            }
             lastTime=glfwGetTime();  
             Life->UpadateCells();
             lifeCellsIndices=getIndices(gridIndices,Life->cells);
@@ -132,8 +141,9 @@ std::vector<unsigned int> getIndices(std::vector<unsigned int> globalIndices,
     return indices;
 }
 
-std::vector<unsigned int> makeGridIndices( int sizeOfGridIndices, int sizeOfRow) 
+std::vector<unsigned int> MakeGridIndices(int sizeOfRow) 
 {
+    auto sizeOfGridIndices =sizeOfRow*sizeOfRow*sizeOfRow; 
     std::vector<unsigned int> gridIndices;
     gridIndices.resize(sizeOfGridIndices);
     int k=0;
@@ -151,4 +161,44 @@ std::vector<unsigned int> makeGridIndices( int sizeOfGridIndices, int sizeOfRow)
         }
         
 return gridIndices;
+}
+
+std::vector<float> MakeVertices(int sizeOfRow)
+{
+    std::vector<float> vertices;
+    for(float i =0;i<=sizeOfRow;++i)
+    {
+        for(float j =0;j<=sizeOfRow;++j)
+        {
+            vertices.push_back( -1.f+j*(2.0f/sizeOfRow) );
+            vertices.push_back( 1.f -i*(2.0f/sizeOfRow));
+            vertices.push_back(0);
+        }
+    }
+    return vertices;
+}
+
+std::unique_ptr<RleReader> RleUpdate(int rleFileIndex)
+{   
+    std::string path;
+    switch (rleFileIndex)
+    {
+    case 0:
+        path = "RlePatterns/bi-gun.rle";
+        break;
+    case 1:
+        path = "RlePatterns/gosperGliderGun.rle";
+        break;
+    case 2:
+        path = "RlePatterns/blinkerfuse.rle";
+        break;
+    case 3:
+        path = "RlePatterns/blinker.rle";
+        break;
+    default:
+        path ="RlePatterns/blinker.rle";
+        break;
+    }
+
+    return std::unique_ptr<RleReader>(new RleReader(path));
 }
