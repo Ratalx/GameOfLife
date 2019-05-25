@@ -115,8 +115,8 @@
           
         try
         {
-          CellShader = std::make_unique<Shader>(Shader("vertexShader.vs",
-                                "BoxFragmentShader.fs"));
+          CellShader = std::make_unique<Shader>(Shader("shaders/vertexShader.vs",
+                                "shaders/BoxFragmentShader.fs"));
         }
         catch(const std::exception& e)
         {
@@ -125,8 +125,8 @@
         }
         try
         {
-            GridShader = std::make_unique<Shader>(Shader("vertexShader.vs",
-                                    "GridFragmentShader.fs"));    
+            GridShader = std::make_unique<Shader>(Shader("shaders/vertexShader.vs",
+                                    "shaders/GridFragmentShader.fs"));    
         }
         catch(const std::exception& e)
         {

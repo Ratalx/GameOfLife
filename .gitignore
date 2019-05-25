@@ -4,3 +4,5 @@ output
 CMakeFiles
 debug
 tryingToChangeColumnSize.diff
+*.out
+*.ini

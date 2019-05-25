@@ -4,7 +4,7 @@
 namespace GameOfLife{
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
-    std::string vertexCode, fragmentCode;
+        std::string vertexCode, fragmentCode;
     std::fstream vertexShaderFile, fragmentShaderFile;
 
     vertexShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
