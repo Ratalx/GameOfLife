@@ -6,3 +6,4 @@ debug
 tryingToChangeColumnSize.diff
 *.out
 *.ini
+clang-tidy

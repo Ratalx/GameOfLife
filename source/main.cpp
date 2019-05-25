@@ -5,7 +5,7 @@
 #include<GameOfLifeLogic.hpp>
 #include<GameOfLifeRenderer.hpp>
 #include<RleReader.hpp>
-#include"shader.hpp"
+#include<shader.hpp>
 #include<iostream>
 #include<string>
 #include<memory>

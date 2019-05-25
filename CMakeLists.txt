@@ -59,3 +59,5 @@ target_link_libraries(${PROJECT_NAME} "ImGui" "${CMAKE_DL_LIBS}")
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
