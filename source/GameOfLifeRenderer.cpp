@@ -2,7 +2,7 @@
     namespace GameOfLife{
     using uniqueWindowPtr =std::unique_ptr<GLFWwindow,std::function<void(GLFWwindow*)>>;
 
-    GameOfLifeRenderer::GameOfLifeRenderer(std::shared_ptr<ConfigData> configData)
+    GameOfLifeRenderer::GameOfLifeRenderer(const std::shared_ptr<ConfigData>& configData) : VBO(0),VAO(0),EBO(0)
     {
         this->configData = configData;
         window = InitializeWindow();
@@ -13,14 +13,14 @@
     }
 
     GameOfLifeRenderer::GameOfLifeRenderer(GameOfLifeRenderer && renderer) noexcept :
-        configData(std::move(renderer.configData)),
         window(std::move(renderer.window)),
-        io(std::move(renderer.io)),
+        VBO(renderer.VBO),
+        VAO(renderer.VAO),
+        EBO(renderer.EBO),
         CellShader(std::move(renderer.CellShader)),
         GridShader(std::move(renderer.GridShader)),
-        VAO(renderer.VAO),
-        VBO(renderer.VBO),
-        EBO(renderer.EBO)
+        configData(std::move(renderer.configData)),
+        io(std::move(renderer.io))
     {
     }
 
@@ -44,7 +44,7 @@
         glfwSetFramebufferSizeCallback(window.get(),framebuffer_size_callback);
         glfwSetMouseButtonCallback(window.get(), mouse_button_callback);
 
-        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+        if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
         {
             std::cerr << "Failed to initialize GLAD"<<std::endl;
             throw std::runtime_error("Glad Load Failed");
@@ -60,7 +60,7 @@
     {
         if(glfwGetKey(window.get(),GLFW_KEY_ESCAPE) == GLFW_PRESS)
         {
-            glfwSetWindowShouldClose(window.get(),true);
+            glfwSetWindowShouldClose(window.get(),static_cast<int>(true));
         }
         return window;
     }
@@ -80,7 +80,7 @@
         glBindBuffer(GL_ARRAY_BUFFER,VBO);
         glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(float),&vertices[0],GL_STATIC_DRAW);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<void*>(0));
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<void*>(nullptr));
         glEnableVertexAttribArray(0);
 
     }
@@ -92,7 +92,7 @@
 
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, gridIndices.size()*sizeof(unsigned int),
                                                     &gridIndices[0], GL_STATIC_DRAW);
-        glDrawElements(GL_TRIANGLES,gridIndices.size(),GL_UNSIGNED_INT,0);
+        glDrawElements(GL_TRIANGLES,gridIndices.size(),GL_UNSIGNED_INT,nullptr);
     }
 
     void GameOfLifeRenderer::DrawCells(std::vector<unsigned int> lifeCellsIndices)
@@ -101,7 +101,7 @@
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, lifeCellsIndices.size()*sizeof(unsigned int),
                                                     &lifeCellsIndices[0], GL_DYNAMIC_DRAW);
-        glDrawElements(GL_TRIANGLES, lifeCellsIndices.size(), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, lifeCellsIndices.size(), GL_UNSIGNED_INT, nullptr);
     }
 
     void GameOfLifeRenderer::BufferSwap()
@@ -190,11 +190,10 @@
             double xpos, ypos;
             glfwGetWindowSize(window,&width,&height);
             glfwGetCursorPos(window, &xpos, &ypos);
-            ConfigData* configData = (ConfigData*)glfwGetWindowUserPointer(window);
-            int x = static_cast<int>(xpos/width*configData->sizeOfRow);
-            int y = static_cast<int>(ypos/height*configData->sizeOfRow);
+            auto configData = (* static_cast<std::shared_ptr<ConfigData>*>(glfwGetWindowUserPointer(window)));
+            auto x = static_cast<int>(xpos/width*configData->sizeOfRow);
+            auto y = static_cast<int>(ypos/height*configData->sizeOfRow);
             configData->cellsToAdd.push_back({x,y});
-
         }
     }
-}
+} // namespace GameOfLife

@@ -5,9 +5,9 @@ namespace GameOfLife{
 GameOfLifeLogic::GameOfLifeLogic(int sizeOfRow)
 {
     cells.resize(sizeOfRow);
-    for(int i=0;i<sizeOfRow;++i)
+    for(auto i=0;i<sizeOfRow;++i)
     {
-        for(int j=0;j<sizeOfRow;++j)
+        for(auto j=0;j<sizeOfRow;++j)
         {
             cells[i].push_back(Cell::dead);
         }
@@ -18,9 +18,9 @@ GameOfLifeLogic::GameOfLifeLogic(int sizeOfRow,const  std::vector< int> & cellsI
 {
     cells.resize(sizeOfRow);
 
-    for(int i=0;i<sizeOfRow;++i)
+    for(auto i=0;i<sizeOfRow;++i)
     {
-        for(int j=0;j<sizeOfRow;++j)
+        for(auto j=0;j<sizeOfRow;++j)
         {
             cells[i].push_back(Cell::dead);
         }
@@ -37,12 +37,12 @@ GameOfLifeLogic::GameOfLifeLogic(int sizeOfRow,const  std::vector< int> & cellsI
 void GameOfLifeLogic::UpadateCells(std::vector<Point> cellsToAdd)
 {   
     cells2 = cells;
-    for(int i =0;i<cells2.size();++i)
+    for(auto i =0;i<cells2.size();++i)
     {
-            nextI = (i+1) % (cells2.size());
-            prevI = i==0?(cells2.size()-1):i-1;
+           unsigned int nextI = (i+1) % (cells2.size());
+            unsigned int prevI = i==0?(cells2.size()-1):i-1;
 
-        for(int j =0;j<cells2[i].size();++j)
+        for(auto j =0;j<cells2[i].size();++j)
         {
                 int sum = 0;
                 int nextJ= (j+1) % (cells2[i].size());
@@ -57,15 +57,21 @@ void GameOfLifeLogic::UpadateCells(std::vector<Point> cellsToAdd)
             sum+=static_cast<int>(cells2[prevI][nextJ]);
             sum+=static_cast<int>(cells2[nextI][prevJ]);
             
-            if(cells[i][j]==Cell::dead&&sum==3)
+            if((cells[i][j]==Cell::dead)&&(sum==3))
+            {
                 cells[i][j]=Cell::life;
-            else if(cells[i][j]==Cell::life&&(sum==2||sum==3))
+            }
+            else if((cells[i][j]==Cell::life)&&(sum==2||sum==3))
+            {
                 cells[i][j]=Cell::life;
-            else 
+            }
+            else
+            { 
                 cells[i][j]=Cell::dead;
+            }
         }
     }
-    while (cellsToAdd.size()>0)
+    while(!cellsToAdd.empty())
     {
         auto cellIndexes = cellsToAdd.back();
         cellsToAdd.pop_back();
@@ -78,4 +84,4 @@ void GameOfLifeLogic::TogleCells(int x, int y)
     cells[x][y]= Cell::life;
     cells[x][y]=static_cast<bool>(cells[x][y]) ? Cell::life : Cell::dead;
 }
-}
+}//namespace GameOfLife

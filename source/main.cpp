@@ -27,7 +27,6 @@ std::unique_ptr<RleReader> RleUpdate(int rleFileIndex);
 
 int main()
 {
-    int sizeOfRow = 10;
     std::shared_ptr<ConfigData> configData(new ConfigData());
     std::unique_ptr<RleReader> rleReader;
     try
@@ -69,7 +68,7 @@ int main()
         {   
             if(configData->isChanged)
             {
-                rleReader = std::move(RleUpdate(configData->rleFileIndex));
+                rleReader = RleUpdate(configData->rleFileIndex);
                 Life = std::make_unique<GameOfLifeLogic>(rleReader->GenerateStartVector());
                 configData->sizeOfRow = Life->cells.size();
                 vertices= MakeVertices(configData->sizeOfRow);
@@ -92,7 +91,7 @@ uniqueWindowPtr processInput(uniqueWindowPtr window)
 {
     if(glfwGetKey(window.get(),GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
-        glfwSetWindowShouldClose(window.get(),true);
+        glfwSetWindowShouldClose(window.get(),static_cast<int>(true));
     }
     return window;
 }
@@ -116,7 +115,7 @@ uniqueWindowPtr InitializeWindow()
     glfwMakeContextCurrent(window.get());
     glfwSetFramebufferSizeCallback(window.get(),framebuffer_size_callback);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    if (gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))==0)
     {
         std::cerr << "Failed to initialize GLAD"<<std::endl;
         throw std::runtime_error("Glad Load Failed");
@@ -135,8 +134,10 @@ std::vector<unsigned int> getIndices(std::vector<unsigned int> globalIndices,
         for(unsigned int j=0;j<cells[i].size();++j)
         {
             if(cells[i][j]==Cell::life)
+            {
             indices.insert(indices.begin(),&globalIndices[i*cells.size()*6 + j*6],
                            &globalIndices[i*cells.size()*6 +j*6+6]);
+            }
         }
     }
     return indices;
@@ -149,6 +150,7 @@ std::vector<unsigned int> MakeGridIndices(int sizeOfRow)
     gridIndices.resize(sizeOfGridIndices);
     int k=0;
     for(int j =0;j<sizeOfRow*sizeOfRow;j+=sizeOfRow+1)
+    {
         for(int i=0;i<sizeOfRow;i++)
         {
             
@@ -160,6 +162,7 @@ std::vector<unsigned int> MakeGridIndices(int sizeOfRow)
                 gridIndices[k+5]=(j+i+sizeOfRow+2);
                 k+=6;
         }
+    }
         
 return gridIndices;
 }
@@ -167,9 +170,9 @@ return gridIndices;
 std::vector<float> MakeVertices(int sizeOfRow)
 {
     std::vector<float> vertices;
-    for(float i =0;i<=sizeOfRow;++i)
+    for(int i =0;i<=sizeOfRow;++i)
     {
-        for(float j =0;j<=sizeOfRow;++j)
+        for(int j =0;j<=sizeOfRow;++j)
         {
             vertices.push_back( -1.f+j*(2.0f/sizeOfRow) );
             vertices.push_back( 1.f -i*(2.0f/sizeOfRow));
@@ -201,5 +204,5 @@ std::unique_ptr<RleReader> RleUpdate(int rleFileIndex)
         break;
     }
 
-    return std::unique_ptr<RleReader>(new RleReader(path));
+    return std::make_unique<RleReader>(RleReader(path));
 }

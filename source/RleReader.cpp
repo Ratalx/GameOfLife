@@ -17,7 +17,7 @@ matrixOfCells RleReader::GenerateStartVector()
         throw std::runtime_error("File Not Open");
     }
    
-    while(getline(file,line)&&line[0]=='#');
+    while(getline(file,line)&&(line[0]=='#'));
     grid = MakeGrid(line);
     
     while(getline(file,line))
@@ -69,13 +69,12 @@ matrixOfCells RleReader::MakeStartingPattern(matrixOfCells& grid, const std::str
     int x = startPoint % sizeOfRow;
     int count=0;
 
-    for(int i =0;i<line.size();++i)
+    for(auto i =0;i<line.size();++i)
     {
-
         if(isNumber(line[i]))
         {   
             count*=10;
-            count += (int)line[i]-48;
+            count += static_cast<int>(line[i])-48;
         }
         else if(isNewLine(line[i]))
         {
@@ -90,7 +89,9 @@ matrixOfCells RleReader::MakeStartingPattern(matrixOfCells& grid, const std::str
         else
         {   
             if(count==0)
-            count=1;
+            {
+                count=1;
+            }
             for(int k =0;k<count;++k)
             {
                 if(line[i]=='o')
@@ -119,4 +120,5 @@ bool RleReader::isEnd(char c) const noexcept
 {
     return (c == '!');
 }
-}
+} //namespace GameOfLife
+

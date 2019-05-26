@@ -7,8 +7,11 @@ namespace GameOfLife
 class RleReader {
     using matrixOfCells = std::vector<std::vector<Cell>>;
     public:
-
     RleReader(const std::string& filePath) : filePath(filePath){};
+    RleReader(RleReader && rleReader) noexcept :
+        filePath(std::move(rleReader.filePath)),
+        gridIndex(std::move(rleReader.gridIndex))
+    {}
     std::vector<std::vector<Cell>>GenerateStartVector();
 
     private:

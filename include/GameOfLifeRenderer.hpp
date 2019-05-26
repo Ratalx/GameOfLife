@@ -27,7 +27,7 @@ class GameOfLifeRenderer
 
     public:
     //Prepare
-    GameOfLifeRenderer(std::shared_ptr<ConfigData> configData);
+    GameOfLifeRenderer(const std::shared_ptr<ConfigData>& configData);
     GameOfLifeRenderer(GameOfLifeRenderer && renderer) noexcept;
    ~GameOfLifeRenderer()
    {
@@ -47,7 +47,7 @@ class GameOfLifeRenderer
     void checkInput(){window = processInput(std::move(window));}
 
     void DrawGrid(std::vector<unsigned int> gridIndices);
-    void DrawCells(std::vector<unsigned int>vertices);
+    void DrawCells(std::vector<unsigned int>lifeCellsIndices);
     void BufferSwap();
     void DrawGui();
 

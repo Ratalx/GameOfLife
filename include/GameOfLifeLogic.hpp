@@ -11,7 +11,6 @@ class GameOfLifeLogic
     std::vector<std::vector<Cell>> cells; 
     std::vector<std::vector<Cell>> cells2; 
 
-    unsigned nextI,nextJ,prevI,prevJ;
     GameOfLifeLogic()=delete;
     GameOfLifeLogic(int sizeOfRow); 
     GameOfLifeLogic(std::vector<std::vector<Cell>> cells): cells(cells){};
@@ -20,4 +19,4 @@ class GameOfLifeLogic
     void TogleCells(int x,int y);
 
 };
-}
+} //namespace GameOfLife

@@ -44,9 +44,9 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     glCompileShader(vertexShader);
 
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if(!success)
+    if(success==0)
     {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
         std::cout<<"ERROR::SHADER::VERTEX::COMPILATION_FAILED"<<std::endl<<infoLog<<std::endl;
     }
 
@@ -55,9 +55,9 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     glCompileShader(fragmentShader);
 
     glGetShaderiv(fragmentShader,GL_COMPILE_STATUS,&success);
-    if(!success)
+    if(success==0)
     {
-         glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+         glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
         std::cout<<"ERROR::SHADER::FRAGMENT::COMPILATION_FAILED"<<std::endl<<infoLog<<std::endl;
     }
 
@@ -68,9 +68,9 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     glLinkProgram(ID);
 
     glGetProgramiv(ID,GL_LINK_STATUS,&success);
-    if(!success)
+    if(success==0)
     {
-         glGetProgramInfoLog(ID, 512, NULL, infoLog);
+         glGetProgramInfoLog(ID, 512, nullptr, infoLog);
         std::cout<<"ERROR::SHADER::PROGRAM::LINKING_FAILED"<<std::endl<<infoLog<<std::endl;
     }
 
@@ -86,7 +86,7 @@ void Shader::use()
 
 void Shader::setBool(const std::string &name, bool value) const
 {
-    glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
+    glUniform1i(glGetUniformLocation(ID, name.c_str()), static_cast<int>(value));
 }
 
 void Shader::setInt(const std::string &name, int value) const
@@ -99,4 +99,4 @@ void Shader::setFloat(const std::string &name, float value) const
     glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 }
 
-}
+} //namespace GameOfLife
