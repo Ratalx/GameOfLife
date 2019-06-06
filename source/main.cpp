@@ -27,7 +27,7 @@ std::unique_ptr<RleReader> RleUpdate(int rleFileIndex);
 
 int main()
 {
-    std::shared_ptr<ConfigData> configData(new ConfigData());
+    std::unique_ptr<ConfigData> configData= std::make_unique<ConfigData>();
     std::unique_ptr<RleReader> rleReader;
     try
     {
@@ -38,9 +38,9 @@ int main()
          std::cerr << e.what() << '\n';
          return -1;
     }
-    std::unique_ptr<GameOfLifeRenderer> Renderer(new GameOfLifeRenderer(configData));
-    std::unique_ptr<GameOfLifeLogic> Life(new GameOfLifeLogic(rleReader->GenerateStartVector()));
-   configData->sizeOfRow = Life->cells.size();
+    std::unique_ptr<GameOfLifeRenderer> Renderer= std::make_unique<GameOfLifeRenderer>(configData.get());
+    std::unique_ptr<GameOfLifeLogic> Life= std::make_unique<GameOfLifeLogic>(rleReader->GenerateStartVector());
+    configData->sizeOfRow = Life->cells.size();
 
     auto vertices= MakeVertices(configData->sizeOfRow);
     auto gridIndices = MakeGridIndices(configData->sizeOfRow);
@@ -204,5 +204,5 @@ std::unique_ptr<RleReader> RleUpdate(int rleFileIndex)
         break;
     }
 
-    return std::make_unique<RleReader>(RleReader(path));
+    return std::make_unique<RleReader>(path);
 }

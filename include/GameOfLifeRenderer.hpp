@@ -22,12 +22,12 @@ class GameOfLifeRenderer
     unsigned int VBO,VAO,EBO;
     std::unique_ptr<Shader> CellShader;
     std::unique_ptr<Shader> GridShader;
-    std::shared_ptr<ConfigData> configData;
+    ConfigData & configData;
     ImGuiIO io;
 
     public:
     //Prepare
-    GameOfLifeRenderer(const std::shared_ptr<ConfigData>& configData);
+    GameOfLifeRenderer(ConfigData* configData);
     GameOfLifeRenderer(GameOfLifeRenderer && renderer) noexcept;
    ~GameOfLifeRenderer()
    {

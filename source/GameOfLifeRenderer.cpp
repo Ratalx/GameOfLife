@@ -2,11 +2,10 @@
     namespace GameOfLife{
     using uniqueWindowPtr =std::unique_ptr<GLFWwindow,std::function<void(GLFWwindow*)>>;
 
-    GameOfLifeRenderer::GameOfLifeRenderer(const std::shared_ptr<ConfigData>& configData) : VBO(0),VAO(0),EBO(0)
+    GameOfLifeRenderer::GameOfLifeRenderer(ConfigData* configData) : VBO(0),VAO(0),EBO(0),configData(*configData)
     {
-        this->configData = configData;
         window = InitializeWindow();
-        glfwSetWindowUserPointer(window.get(), configData.get());
+        glfwSetWindowUserPointer(window.get(), configData);
         io = SetupImGuiContext();
         ImGui_ImplGlfw_InitForOpenGL(window.get(), true);
         ImGui_ImplOpenGL3_Init(glsl_version);
@@ -19,7 +18,7 @@
         EBO(renderer.EBO),
         CellShader(std::move(renderer.CellShader)),
         GridShader(std::move(renderer.GridShader)),
-        configData(std::move(renderer.configData)),
+        configData(renderer.configData),
         io(std::move(renderer.io))
     {
     }
@@ -150,24 +149,24 @@
         ImGui::NewFrame();
         {
             ImGui::Begin("GameOfLife");                          
-            auto rleFileIndexTemp=configData->rleFileIndex;
-            ImGui::RadioButton("Blinker", &configData->rleFileIndex,0);   
+            auto rleFileIndexTemp=configData.rleFileIndex;
+            ImGui::RadioButton("Blinker", &configData.rleFileIndex,0);   
             ImGui::SameLine();
-            ImGui::RadioButton("GliterGun", &configData->rleFileIndex,1);
-            ImGui::RadioButton("Blinker++",&configData->rleFileIndex,2);
+            ImGui::RadioButton("GliterGun", &configData.rleFileIndex,1);
+            ImGui::RadioButton("Blinker++",&configData.rleFileIndex,2);
             ImGui::SameLine();
-            ImGui::RadioButton("bi-gun",&configData->rleFileIndex,3);
-            if(rleFileIndexTemp!=configData->rleFileIndex)
+            ImGui::RadioButton("bi-gun",&configData.rleFileIndex,3);
+            if(rleFileIndexTemp!=configData.rleFileIndex)
             {
-                configData->isChanged = true;
+                configData.isChanged = true;
             }
             if (ImGui::Button("Start/Stop"))
             {
-                configData->isRunning=!configData->isRunning;
+                configData.isRunning=!configData.isRunning;
             }  
             ImGui::SameLine();
 
-            ImGui::SliderFloat("tickTime", &configData->tickTime, 0.0f, 1.0f);
+            ImGui::SliderFloat("tickTime", &configData.tickTime, 0.0f, 1.0f);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
@@ -190,10 +189,10 @@
             double xpos, ypos;
             glfwGetWindowSize(window,&width,&height);
             glfwGetCursorPos(window, &xpos, &ypos);
-            auto configData = (* static_cast<std::shared_ptr<ConfigData>*>(glfwGetWindowUserPointer(window)));
-            auto x = static_cast<int>(xpos/width*configData->sizeOfRow);
-            auto y = static_cast<int>(ypos/height*configData->sizeOfRow);
-            configData->cellsToAdd.push_back({x,y});
+            auto & configData = *static_cast<ConfigData*>(glfwGetWindowUserPointer(window));
+            auto x = static_cast<int>(xpos/width*configData.sizeOfRow);
+            auto y = static_cast<int>(ypos/height*configData.sizeOfRow);
+            configData.cellsToAdd.push_back({x,y});
         }
     }
 } // namespace GameOfLife
