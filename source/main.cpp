@@ -12,7 +12,6 @@
 #include<functional>
 #include<array>
 
-using namespace GameOfLife;
 using uniqueWindowPtr =std::unique_ptr<GLFWwindow,std::function<void(GLFWwindow*)>>;
 
 uniqueWindowPtr processInput(uniqueWindowPtr window);
@@ -23,11 +22,12 @@ std::vector<unsigned int> MakeGridIndices(int sizeOfRow);
 double clockToMilliseconds(clock_t ticks);
 ImGuiIO SetupImGuiContext();
 std::vector<float> MakeVertices(int sizeOfRow);
-std::unique_ptr<RleReader> RleUpdate(int rleFileIndex);
+std::unique_ptr<GameOfLife::RleReader> RleUpdate(int rleFileIndex);
 
 int main()
-{
-    std::unique_ptr<ConfigData> configData= std::make_unique<ConfigData>();
+{   
+    using namespace GameOfLife;
+    auto configData= std::make_unique<ConfigData>();
     std::unique_ptr<RleReader> rleReader;
     try
     {
@@ -38,8 +38,8 @@ int main()
          std::cerr << e.what() << '\n';
          return -1;
     }
-    std::unique_ptr<GameOfLifeRenderer> Renderer= std::make_unique<GameOfLifeRenderer>(configData.get());
-    std::unique_ptr<GameOfLifeLogic> Life= std::make_unique<GameOfLifeLogic>(rleReader->GenerateStartVector());
+    auto Renderer= std::make_unique<GameOfLifeRenderer>(configData.get());
+    auto Life= std::make_unique<GameOfLifeLogic>(rleReader->GenerateStartVector());
     configData->sizeOfRow = Life->cells.size();
 
     auto vertices= MakeVertices(configData->sizeOfRow);
@@ -113,7 +113,7 @@ uniqueWindowPtr InitializeWindow()
     }
 
     glfwMakeContextCurrent(window.get());
-    glfwSetFramebufferSizeCallback(window.get(),framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(window.get(),GameOfLife::framebuffer_size_callback);
 
     if (gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))==0)
     {
@@ -182,7 +182,7 @@ std::vector<float> MakeVertices(int sizeOfRow)
     return vertices;
 }
 
-std::unique_ptr<RleReader> RleUpdate(int rleFileIndex)
+std::unique_ptr<GameOfLife::RleReader> RleUpdate(int rleFileIndex)
 {   
     std::string path;
     switch (rleFileIndex)
@@ -204,5 +204,5 @@ std::unique_ptr<RleReader> RleUpdate(int rleFileIndex)
         break;
     }
 
-    return std::make_unique<RleReader>(path);
+    return std::make_unique<GameOfLife::RleReader>(path);
 }

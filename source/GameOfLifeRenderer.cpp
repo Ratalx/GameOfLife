@@ -11,18 +11,6 @@
         ImGui_ImplOpenGL3_Init(glsl_version);
     }
 
-    GameOfLifeRenderer::GameOfLifeRenderer(GameOfLifeRenderer && renderer) noexcept :
-        window(std::move(renderer.window)),
-        VBO(renderer.VBO),
-        VAO(renderer.VAO),
-        EBO(renderer.EBO),
-        CellShader(std::move(renderer.CellShader)),
-        GridShader(std::move(renderer.GridShader)),
-        configData(renderer.configData),
-        io(std::move(renderer.io))
-    {
-    }
-
     uniqueWindowPtr GameOfLifeRenderer::InitializeWindow()
     {
         glfwInit();
@@ -43,7 +31,7 @@
         glfwSetFramebufferSizeCallback(window.get(),framebuffer_size_callback);
         glfwSetMouseButtonCallback(window.get(), mouse_button_callback);
 
-        if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
+        if (gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))==0)
         {
             std::cerr << "Failed to initialize GLAD"<<std::endl;
             throw std::runtime_error("Glad Load Failed");

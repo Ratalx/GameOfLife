@@ -7,3 +7,4 @@ tryingToChangeColumnSize.diff
 *.out
 *.ini
 clang-tidy
+todo.txt

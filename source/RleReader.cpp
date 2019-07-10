@@ -69,7 +69,7 @@ matrixOfCells RleReader::MakeStartingPattern(matrixOfCells& grid, const std::str
     int x = startPoint % sizeOfRow;
     int count=0;
 
-    for(auto i =0;i<line.size();++i)
+    for(unsigned int i =0;i<line.size();++i)
     {
         if(isNumber(line[i]))
         {   

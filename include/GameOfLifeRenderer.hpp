@@ -28,7 +28,6 @@ class GameOfLifeRenderer
     public:
     //Prepare
     GameOfLifeRenderer(ConfigData* configData);
-    GameOfLifeRenderer(GameOfLifeRenderer && renderer) noexcept;
    ~GameOfLifeRenderer()
    {
         glDeleteVertexArrays(1, &VAO);
