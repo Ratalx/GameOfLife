@@ -1,26 +1,28 @@
-#include"../include/GameOfLifeLogic.hpp"
-#include<iostream>
-#include"../include/GameOfLifeRenderer.hpp"
+#include "GameOfLifeLogic.hpp"
+#include "GameOfLifeRenderer.hpp"
+#include <iostream>
+
 namespace GameOfLife{
+
 GameOfLifeLogic::GameOfLifeLogic(int sizeOfRow)
 {
     cells.resize(sizeOfRow);
-    for(auto i=0;i<sizeOfRow;++i)
+    for(auto i = 0; i < sizeOfRow; ++i)
     {
-        for(auto j=0;j<sizeOfRow;++j)
+        for(auto j = 0; j < sizeOfRow; ++j)
         {
             cells[i].push_back(Cell::dead);
         }
     }
 }
 
-GameOfLifeLogic::GameOfLifeLogic(int sizeOfRow,const  std::vector< int> & cellsIndexes)
+GameOfLifeLogic::GameOfLifeLogic(int sizeOfRow,const std::vector<int> & cellsIndexes)
 {
     cells.resize(sizeOfRow);
 
-    for(auto i=0;i<sizeOfRow;++i)
+    for(auto i = 0;i < sizeOfRow; ++i)
     {
-        for(auto j=0;j<sizeOfRow;++j)
+        for(auto j = 0; j < sizeOfRow; ++j)
         {
             cells[i].push_back(Cell::dead);
         }
@@ -37,16 +39,16 @@ GameOfLifeLogic::GameOfLifeLogic(int sizeOfRow,const  std::vector< int> & cellsI
 void GameOfLifeLogic::UpadateCells(std::vector<Point> cellsToAdd)
 {   
     cells2 = cells;
-    for(auto i =0;i<cells2.size();++i)
+    for(auto i = 0; i < cells2.size(); ++i)
     {
-           unsigned int nextI = (i+1) % (cells2.size());
-            unsigned int prevI = i==0?(cells2.size()-1):i-1;
+           unsigned int nextI = (i + 1) % (cells2.size());
+            unsigned int prevI = (i == 0) ? (cells2.size() - 1) : (i - 1);
 
-        for(auto j =0;j<cells2[i].size();++j)
+        for(auto j = 0; j < cells2[i].size(); ++j)
         {
                 int sum = 0;
-                int nextJ= (j+1) % (cells2[i].size());
-                int prevJ = j==0?(cells2[i].size()-1):j-1;
+                int nextJ = (j+1) % (cells2[i].size());
+                int prevJ = (j == 0) ? (cells2[i].size() - 1) : (j - 1);
 
             sum+=static_cast<int>(cells2[i][prevJ]);       
             sum+=static_cast<int>(cells2[prevI][j]);       
@@ -75,13 +77,13 @@ void GameOfLifeLogic::UpadateCells(std::vector<Point> cellsToAdd)
     {
         auto cellIndexes = cellsToAdd.back();
         cellsToAdd.pop_back();
-        cells[cellIndexes.y][cellIndexes.x]=Cell::life;
+        cells[cellIndexes.y][cellIndexes.x] = Cell::life;
     }
     
 }
 void GameOfLifeLogic::TogleCells(int x, int y)
 {
-    cells[x][y]= Cell::life;
-    cells[x][y]=static_cast<bool>(cells[x][y]) ? Cell::life : Cell::dead;
+    cells[x][y] = Cell::life;
+    cells[x][y] = static_cast<bool>(cells[x][y]) ? Cell::life : Cell::dead;
 }
 }//namespace GameOfLife

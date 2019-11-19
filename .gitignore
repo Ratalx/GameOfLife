@@ -8,3 +8,4 @@ tryingToChangeColumnSize.diff
 *.ini
 clang-tidy
 todo.txt
+*.exe

@@ -1,31 +1,35 @@
 #pragma once
-#include<shader.hpp>
-#include<GLFW/glfw3.h>
+
+#include "shader.hpp"
+#include "RleReader.hpp"
+#include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include<RleReader.hpp>
-#include<memory>
-#include<functional>
-#include<vector>
-namespace GameOfLife{
+#include <memory>
+#include <functional>
+#include <vector>
+
+namespace GameOfLife
+{
 struct ConfigData;
+
 class GameOfLifeRenderer
 {
     using uniqueWindowPtr =std::unique_ptr<GLFWwindow,std::function<void(GLFWwindow*)>>;
     const char* glsl_version = "#version 130";
 
-    public:
+public:
     uniqueWindowPtr window;
 
-    private:
+private:
     unsigned int VBO,VAO,EBO;
     std::unique_ptr<Shader> CellShader;
     std::unique_ptr<Shader> GridShader;
     ConfigData & configData;
     ImGuiIO io;
 
-    public:
+public:
     //Prepare
     GameOfLifeRenderer(ConfigData* configData);
    ~GameOfLifeRenderer()
@@ -50,7 +54,7 @@ class GameOfLifeRenderer
     void BufferSwap();
     void DrawGui();
 
-    private:
+private:
     ImGuiIO SetupImGuiContext();
     uniqueWindowPtr InitializeWindow();
     uniqueWindowPtr processInput(uniqueWindowPtr window);
@@ -72,6 +76,7 @@ struct ConfigData
     int sizeOfRow = 20;
     std::vector<Point> cellsToAdd;
 };
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 }

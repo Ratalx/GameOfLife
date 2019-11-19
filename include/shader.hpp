@@ -1,15 +1,15 @@
 #pragma once
 
 #include <glad/glad.h>
-
 #include <string>
 #include <sstream>
 #include <iostream>
+
 namespace GameOfLife
 {
 class Shader
 {
-    public:
+public:
     unsigned int ID;
 
     Shader(const char* vertexPath, const GLchar* fragmentPath);

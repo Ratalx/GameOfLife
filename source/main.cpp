@@ -1,25 +1,24 @@
-#include<GLFW/glfw3.h>
-#include<imgui.h>
-#include<imgui_impl_glfw.h>
-#include<imgui_impl_opengl3.h>
-#include<GameOfLifeLogic.hpp>
-#include<GameOfLifeRenderer.hpp>
-#include<RleReader.hpp>
-#include<shader.hpp>
-#include<iostream>
-#include<string>
-#include<memory>
-#include<functional>
-#include<array>
+#include "GameOfLifeLogic.hpp"
+#include "GameOfLifeRenderer.hpp"
+#include "RleReader.hpp"
+#include "shader.hpp"
+#include <GLFW/glfw3.h>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+#include <iostream>
+#include <string>
+#include <memory>
+#include <functional>
+#include <array>
 
-using uniqueWindowPtr =std::unique_ptr<GLFWwindow,std::function<void(GLFWwindow*)>>;
+using uniqueWindowPtr = std::unique_ptr<GLFWwindow,std::function<void(GLFWwindow*)>>;
 
 uniqueWindowPtr processInput(uniqueWindowPtr window);
 std::vector<unsigned int> getIndices(std::vector<unsigned int> globalIndices,
-                            std::vector<std::vector<Cell>> cells);
+                                     std::vector<std::vector<Cell>> cells);
 uniqueWindowPtr InitializeWindow();
 std::vector<unsigned int> MakeGridIndices(int sizeOfRow);
-double clockToMilliseconds(clock_t ticks);
 ImGuiIO SetupImGuiContext();
 std::vector<float> MakeVertices(int sizeOfRow);
 std::unique_ptr<GameOfLife::RleReader> RleUpdate(int rleFileIndex);
@@ -27,11 +26,11 @@ std::unique_ptr<GameOfLife::RleReader> RleUpdate(int rleFileIndex);
 int main()
 {   
     using namespace GameOfLife;
-    auto configData= std::make_unique<ConfigData>();
+    auto configData = std::make_unique<ConfigData>();
     std::unique_ptr<RleReader> rleReader;
     try
     {
-        rleReader=std::make_unique<RleReader>("RlePatterns/blinker.rle");
+        rleReader = std::make_unique<RleReader>("RlePatterns/blinker.rle");
     }
     catch(const std::exception& e)
     {
@@ -44,16 +43,15 @@ int main()
 
     auto vertices= MakeVertices(configData->sizeOfRow);
     auto gridIndices = MakeGridIndices(configData->sizeOfRow);
-    auto lifeCellsIndices = getIndices(gridIndices,Life->cells);
+    auto lifeCellsIndices = getIndices(gridIndices, Life->cells);
 
     Renderer->MakeShaders();
-    Renderer->PrepareBuffers(vertices,gridIndices);
+    Renderer->PrepareBuffers(vertices, gridIndices);
 
-    double lastTime =0.0;
+    double lastTime = 0.0;
 
     while(!Renderer->toClose())
     { 
-
         Renderer->checkInput();
 
         Renderer->Clear();
@@ -64,32 +62,31 @@ int main()
 
         Renderer->BufferSwap();
 
-        if(glfwGetTime()-lastTime >= configData->tickTime&&configData->isRunning)
+        if(((glfwGetTime() - lastTime) >= (configData->tickTime)) && configData->isRunning)
         {   
             if(configData->isChanged)
             {
                 rleReader = RleUpdate(configData->rleFileIndex);
                 Life = std::make_unique<GameOfLifeLogic>(rleReader->GenerateStartVector());
                 configData->sizeOfRow = Life->cells.size();
-                vertices= MakeVertices(configData->sizeOfRow);
+                vertices = MakeVertices(configData->sizeOfRow);
                 gridIndices = MakeGridIndices(configData->sizeOfRow);
-                lifeCellsIndices = getIndices(gridIndices,Life->cells);
-                Renderer->PrepareBuffers(vertices,gridIndices);
-                configData->isChanged=false;
+                lifeCellsIndices = getIndices(gridIndices, Life->cells);
+                Renderer->PrepareBuffers(vertices, gridIndices);
+                configData->isChanged = false;
             }
-            lastTime=glfwGetTime();  
+            lastTime = glfwGetTime();  
             Life->UpadateCells(configData->cellsToAdd);
             configData->cellsToAdd.erase(configData->cellsToAdd.begin(),configData->cellsToAdd.end());
             lifeCellsIndices=getIndices(gridIndices,Life->cells);
         }
     }
-
     return 0;
 }
 
 uniqueWindowPtr processInput(uniqueWindowPtr window)
 {
-    if(glfwGetKey(window.get(),GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    if(glfwGetKey(window.get(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window.get(),static_cast<int>(true));
     }
@@ -104,23 +101,23 @@ uniqueWindowPtr InitializeWindow()
     glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);   
 
 
-    uniqueWindowPtr window (glfwCreateWindow(800,600,"Game Of Life",nullptr,nullptr),glfwDestroyWindow);
+    uniqueWindowPtr window (glfwCreateWindow(800, 600, "Game Of Life", nullptr, nullptr), glfwDestroyWindow);
     if (window == nullptr)
     {
-        std::cerr<<"Failed to Create GLFW Window"<<std::endl;
+        std::cerr << "Failed to Create GLFW Window" << std::endl;
         glfwTerminate();
         throw std::runtime_error("GLFW Load Failed");
     }
 
     glfwMakeContextCurrent(window.get());
-    glfwSetFramebufferSizeCallback(window.get(),GameOfLife::framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(window.get(), GameOfLife::framebuffer_size_callback);
 
-    if (gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))==0)
+    if (gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)) == 0)
     {
-        std::cerr << "Failed to initialize GLAD"<<std::endl;
+        std::cerr << "Failed to initialize GLAD" << std::endl;
         throw std::runtime_error("Glad Load Failed");
     }
-    glViewport(0,0,800,600);
+    glViewport(0, 0, 800, 600);
 
     return window;
 }
@@ -129,14 +126,14 @@ std::vector<unsigned int> getIndices(std::vector<unsigned int> globalIndices,
                                      std::vector<std::vector<Cell>> cells)
 {
     std::vector<unsigned int> indices;
-    for(unsigned int i =0;i<cells.size();++i)
+    for(unsigned int i = 0; i < cells.size(); ++i)
     {
-        for(unsigned int j=0;j<cells[i].size();++j)
+        for(unsigned int j = 0; j < cells[i].size(); ++j)
         {
-            if(cells[i][j]==Cell::life)
+            if(cells[i][j] == Cell::life)
             {
-            indices.insert(indices.begin(),&globalIndices[i*cells.size()*6 + j*6],
-                           &globalIndices[i*cells.size()*6 +j*6+6]);
+            indices.insert(indices.begin(), &globalIndices[i * cells.size() * 6 + j * 6],
+                           &globalIndices[i * cells.size() * 6 + j * 6 + 6]);
             }
         }
     }
@@ -145,22 +142,22 @@ std::vector<unsigned int> getIndices(std::vector<unsigned int> globalIndices,
 
 std::vector<unsigned int> MakeGridIndices(int sizeOfRow) 
 {
-    auto sizeOfGridIndices =sizeOfRow*sizeOfRow*sizeOfRow; 
+    auto sizeOfGridIndices =sizeOfRow * sizeOfRow * sizeOfRow; 
     std::vector<unsigned int> gridIndices;
     gridIndices.resize(sizeOfGridIndices);
-    int k=0;
-    for(int j =0;j<sizeOfRow*sizeOfRow;j+=sizeOfRow+1)
+    int k = 0;
+    for(int j = 0; j < sizeOfRow * sizeOfRow; j += (sizeOfRow+1))
     {
-        for(int i=0;i<sizeOfRow;i++)
+        for(int i = 0; i < sizeOfRow; ++i)
         {
             
-                gridIndices[k]=(j+i);
-                gridIndices[k+1]=(j+i+1);
-                gridIndices[k+2]=(j+i+sizeOfRow+2);
-                gridIndices[k+3]=(j+i);
-                gridIndices[k+4]=(j+i+sizeOfRow+1);
-                gridIndices[k+5]=(j+i+sizeOfRow+2);
-                k+=6;
+                gridIndices[k] = (j + i);
+                gridIndices[k + 1] = (j + i + 1);
+                gridIndices[k + 2] = (j + i + sizeOfRow + 2);
+                gridIndices[k + 3] = (j + i);
+                gridIndices[k + 4] = (j + i + sizeOfRow + 1);
+                gridIndices[k + 5] = (j + i + sizeOfRow + 2);
+                k += 6;
         }
     }
         
@@ -170,12 +167,12 @@ return gridIndices;
 std::vector<float> MakeVertices(int sizeOfRow)
 {
     std::vector<float> vertices;
-    for(int i =0;i<=sizeOfRow;++i)
+    for(int i = 0; i <= sizeOfRow; ++i)
     {
-        for(int j =0;j<=sizeOfRow;++j)
+        for(int j = 0; j <= sizeOfRow; ++j)
         {
-            vertices.push_back( -1.f+j*(2.0f/sizeOfRow) );
-            vertices.push_back( 1.f -i*(2.0f/sizeOfRow));
+            vertices.push_back( -1.f + (j * (2.0f/sizeOfRow)));
+            vertices.push_back( 1.f - (i * (2.0f/sizeOfRow)));
             vertices.push_back(0);
         }
     }
@@ -203,6 +200,5 @@ std::unique_ptr<GameOfLife::RleReader> RleUpdate(int rleFileIndex)
         path ="RlePatterns/blinker.rle";
         break;
     }
-
     return std::make_unique<GameOfLife::RleReader>(path);
 }

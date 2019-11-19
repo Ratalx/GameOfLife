@@ -1,20 +1,24 @@
 #pragma once
+
+#include"GameOfLifeLogic.hpp"
 #include<string>
 #include<istream>
-#include"GameOfLifeLogic.hpp"
+
 namespace GameOfLife
 {
-class RleReader {
+class RleReader 
+{
     using matrixOfCells = std::vector<std::vector<Cell>>;
-    public:
+public:
     RleReader(const std::string& filePath) : filePath(filePath){};
     RleReader(RleReader && rleReader) noexcept :
         filePath(std::move(rleReader.filePath)),
         gridIndex(std::move(rleReader.gridIndex))
-    {}
+    {};
+    
     std::vector<std::vector<Cell>>GenerateStartVector();
 
-    private:
+private:
     std::string filePath;
     int gridIndex;
     matrixOfCells MakeGrid(const std::string&);
