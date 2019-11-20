@@ -1,5 +1,5 @@
 # GameOfLife
-This project is based on *"Advenced C++"* course at my univeristy. Assignment was to make *["Conway's Game of Life"](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life)* cellular automata in c++ using past c++11 features both boost and stl.
+This project is based on *"Advanced C++"* course at my univeristy. Assignment was to make *["Conway's Game of Life"](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life)* cellular automata in c++ using past c++11 features both boost and stl.
 ![GameOfLifePreview](./GameOfLifePreview.PNG "[Game Of Life Preview")
 
 ## OpenGL
