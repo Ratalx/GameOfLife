@@ -37,5 +37,5 @@ Prerequsition you need to have **Cmake** and some build tool e.g. **Ninja**, **G
 * ConfigData is the data structure used as a comunication buffer between main, Logic and Rendering part of program.
 
 ## To do:
-- [ ] Polish building process to remove nessecity of moving executable into main directory.
+- [ ] Polish building process to remove necessity of moving executable into main directory.
 - [ ] Optimize Algorithm 
